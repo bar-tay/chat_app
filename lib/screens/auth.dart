@@ -22,6 +22,7 @@ class _AuthScreen extends State<AuthScreen> {
   var _isLogin = true;
   var _enteredEmail = "";
   var _enteredPassword = "";
+  var _enteredUsername = "";
   File? _selectedImage;
   var _isAuthenticating = false;
 
@@ -43,23 +44,25 @@ class _AuthScreen extends State<AuthScreen> {
       if (_isLogin) {
         final userCredentials = await _firebase.signInWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
-        print(userCredentials);
       } else {
         final userCredentials = await _firebase.createUserWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
+
         //creates path for image upload
         final storageRef = FirebaseStorage.instance
             .ref()
             .child("user_images")
             .child("${userCredentials.user!.uid}.jpg");
+
         await storageRef.putFile(_selectedImage!);
+
         final imageUrl = await storageRef.getDownloadURL();
-        print(imageUrl);
+
         await FirebaseFirestore.instance
             .collection("users")
             .doc(userCredentials.user!.uid)
             .set({
-          "username": "to be done..",
+          "username": _enteredUsername,
           "email": _enteredEmail,
           "image_url": imageUrl
         });
@@ -131,6 +134,21 @@ class _AuthScreen extends State<AuthScreen> {
                           autocorrect: false,
                           textCapitalization: TextCapitalization.none,
                         ),
+                        if (!_isLogin)
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null ||
+                                  value.isEmpty ||
+                                  value.trim().length < 4) {
+                                return "Please enter a valide username. Username must be at least 4 characters long.";
+                              }
+                              return null;
+                            },
+                            onSaved: (newValue) => _enteredUsername = newValue!,
+                            enableSuggestions: false,
+                            decoration:
+                                const InputDecoration(labelText: "Username"),
+                          ),
                         TextFormField(
                           validator: (value) {
                             if (value == null || value.trim().length < 6) {
