@@ -42,7 +42,7 @@ class _AuthScreen extends State<AuthScreen> {
       });
 
       if (_isLogin) {
-        final userCredentials = await _firebase.signInWithEmailAndPassword(
+        await _firebase.signInWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
       } else {
         final userCredentials = await _firebase.createUserWithEmailAndPassword(
@@ -165,7 +165,8 @@ class _AuthScreen extends State<AuthScreen> {
                           obscureText: true,
                         ),
                         const SizedBox(height: 12),
-                        if (_isAuthenticating) CircularProgressIndicator(),
+                        if (_isAuthenticating)
+                          const CircularProgressIndicator(),
                         if (!_isAuthenticating)
                           ElevatedButton(
                             onPressed: _submit,
